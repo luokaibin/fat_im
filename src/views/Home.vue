@@ -71,12 +71,25 @@ export default {
       this.hasName = false;
     }
   },
-  created() {
-    if (localStorage.name) {
-      this.name = localStorage.name;
-      this.hasName = false;
-    } else {
-      this.hasName = true;
+  // created() {
+  //   if (localStorage.name) {
+  //     this.name = localStorage.name;
+  //     this.hasName = false;
+  //   } else {
+  //     this.hasName = true;
+  //   }
+  // },
+  async created() {
+    try {
+      // const res = await this.$db.table('imlist').reverse().limit(3).toArray();
+      const res = await this.$db.imlist
+        .where("sendTime")
+        .reverse()
+        .limit(3)
+        .toArray();
+      this.data = res;
+    } catch (error) {
+      throw error;
     }
   },
   mounted() {

@@ -4,6 +4,7 @@ import App from "./App.vue";
 import router from "./router";
 import store from "./store";
 import iView from "iview";
+import db from "./config/db";
 import "./registerServiceWorker";
 import "./assets/reset.css";
 
@@ -13,12 +14,13 @@ const socket = socket_io("http://192.168.2.100:3939");
 socket.on("service msg", msg => {
   store.dispatch("listen_new_msg", msg);
 });
-if (localStorage.im_detail_list) {
-  const im_detail_list = JSON.parse(localStorage.im_detail_list);
-  store.commit("upDateIm_detail_list", im_detail_list);
-}
+// if (localStorage.im_detail_list) {
+//   const im_detail_list = JSON.parse(localStorage.im_detail_list);
+//   store.commit("upDateIm_detail_list", im_detail_list);
+// }
 Vue.use(iView);
 Vue.prototype.$socket = socket;
+Vue.prototype.$db = db;
 new Vue({
   router,
   store,
