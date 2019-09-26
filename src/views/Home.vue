@@ -1,7 +1,12 @@
 <template>
   <div class="im_container">
-    <div class="header">群聊</div>
+    <div class="header">
+      群聊<span style="width: 0; height: 0;opacity: 0;"></span>
+    </div>
     <div class="content_list" ref="content_list">
+      <p class="more" @click="handleUpdataList" v-if="pageNum > 0">
+        加载更多内容
+      </p>
       <div class="li" v-for="(item, index) of list" :key="index">
         <div :class="{ user: true, blue: item.name === name }">
           {{ item.name }}
@@ -39,13 +44,15 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState, mapMutations } from "vuex";
 export default {
   name: "home",
   components: {},
   computed: {
     ...mapState({
-      list: state => state.im_detail_list
+      list: state => state.list,
+      pageNum: state => state.pageNum,
+      isScroll: state => state.isScroll
     }),
     disabled() {
       return !this.name;
@@ -59,6 +66,7 @@ export default {
     };
   },
   methods: {
+    ...mapMutations(["handleUpdataList"]),
     handleMsgSend() {
       this.$socket.emit("client msg", {
         name: this.name,
@@ -67,27 +75,18 @@ export default {
       this.msg_content = "";
     },
     handleSetName() {
-      localStorage.setItem("name", this.name);
+      localforage.setItem("name", this.name);
       this.hasName = false;
     }
   },
-  // created() {
-  //   if (localStorage.name) {
-  //     this.name = localStorage.name;
-  //     this.hasName = false;
-  //   } else {
-  //     this.hasName = true;
-  //   }
-  // },
   async created() {
     try {
-      // const res = await this.$db.table('imlist').reverse().limit(3).toArray();
-      const res = await this.$db.imlist
-        .where("sendTime")
-        .reverse()
-        .limit(3)
-        .toArray();
-      this.data = res;
+      const im_detail_list = await localforage.getItem("im_detail_list");
+      if (im_detail_list && Array.isArray(im_detail_list)) {
+        this.$store.dispatch("handleImList", im_detail_list);
+      }
+      const name = await localforage.getItem("name");
+      this.hasName = !name;
     } catch (error) {
       throw error;
     }
@@ -97,8 +96,10 @@ export default {
     list.scrollTop = list.scrollHeight;
   },
   updated() {
-    const list = this.$refs.content_list;
-    list.scrollTop = list.scrollHeight;
+    if (this.isScroll) {
+      const list = this.$refs.content_list;
+      list.scrollTop = list.scrollHeight;
+    }
   }
 };
 </script>
@@ -122,6 +123,12 @@ export default {
 .content_list {
   flex: 1;
   overflow-y: auto;
+  .more {
+    color: #409eff;
+    box-sizing: border-box;
+    padding: 0.5rem;
+    cursor: pointer;
+  }
   .li {
     width: 100vw;
     display: flex;

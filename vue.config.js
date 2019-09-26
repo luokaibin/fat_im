@@ -8,7 +8,8 @@ module.exports = {
     externals: {
       socket_io: "io", // '包名':'全局变量'
       iview: "iview", // '包名':'全局变量'
-      dexie: "Dexie"
+      // dexie: "Dexie",
+      localforage: "localforage"
     }
   },
   // chainWebpack: config => {
